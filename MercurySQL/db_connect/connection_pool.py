@@ -1,4 +1,4 @@
-from ..errors import orm as orm_errors
+from ..errors import db_connect as dbc_errors
 
 import threading
 
@@ -23,7 +23,7 @@ class ConnPool:
     def __del__(self):
         if len(self.pool) > 0:
             self.close()
-            raise orm_errors.connection_pool.ConnPoolNotClosedError(
+            raise dbc_errors.connection_pool.ConnPoolNotClosedError(
                 "The connection pool is not fully closed. Automatically closed all connections for you."
             )
 

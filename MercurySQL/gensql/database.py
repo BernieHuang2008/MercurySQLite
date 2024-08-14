@@ -15,7 +15,7 @@ Methods
 """
 from typing import List
 
-from ..orm.command_queue import CommandQueue
+from ..db_connect.command_queue import CommandQueue
 from ..drivers import BaseDriver
 from ..errors import *
 
