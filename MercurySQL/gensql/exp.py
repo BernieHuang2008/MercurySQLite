@@ -165,7 +165,7 @@ class Exp(BasicExp):
 
         condition, paras = self.formula()
 
-        cmd = self.driver.APIs.gensql.query(self.table.table_name, select, condition)
+        cmd = self.driver.APIs.gensql.query(self.table.table_name, select, condition, self.table.db)
         res = self.table.db.do(cmd, paras=[paras])
         return res.fetchall()
 
