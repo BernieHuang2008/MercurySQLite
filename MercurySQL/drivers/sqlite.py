@@ -2,6 +2,7 @@
 Requirements: 
   - sqlite3
 """
+
 from .base import BaseDriver
 
 import sqlite3
@@ -13,9 +14,9 @@ class Driver_SQLite(BaseDriver):
 
 
 class Driver_SQLite(BaseDriver):
-    dependencies = ['sqlite3']
-    version = '0.1.0'
-    payload = '?'
+    dependencies = ["sqlite3"]
+    version = "0.1.0"
+    payload = "?"
 
     Conn = sqlite3.Connection
     Cursor = sqlite3.Cursor
@@ -35,7 +36,13 @@ class Driver_SQLite(BaseDriver):
                 return f"PRAGMA table_info({table_name});"
 
             @staticmethod
-            def create_table_if_not_exists(table_name: str, column_name: str, column_type: str, primaryKey=False, autoIncrement=False) -> str:
+            def create_table_if_not_exists(
+                table_name: str,
+                column_name: str,
+                column_type: str,
+                primaryKey=False,
+                autoIncrement=False,
+            ) -> str:
                 return f"""
                     CREATE TABLE IF NOT EXISTS {table_name} ({column_name} {column_type} {'PRIMARY KEY' if primaryKey else ''} {'AUTOINCREMENT' if autoIncrement else ''})
                 """
@@ -58,7 +65,7 @@ class Driver_SQLite(BaseDriver):
                     f"CREATE TABLE ___temp_table ({keyname} {keytype} PRIMARY KEY, {', '.join([f'{name} {type_}' for name, type_ in table.columnsType.items() if name != keyname])})",
                     f"INSERT INTO ___temp_table SELECT * FROM {table.table_name}",
                     f"DROP TABLE {table.table_name}",
-                    f"ALTER TABLE ___temp_table RENAME TO {table.table_name}"
+                    f"ALTER TABLE ___temp_table RENAME TO {table.table_name}",
                 ]
 
             @staticmethod
@@ -67,7 +74,9 @@ class Driver_SQLite(BaseDriver):
 
             @staticmethod
             def insert_or_update(table_name: str, columns: str, values: str) -> str:
-                return f"INSERT OR REPLACE INTO {table_name} ({columns}) VALUES ({values})"
+                return (
+                    f"INSERT OR REPLACE INTO {table_name} ({columns}) VALUES ({values})"
+                )
 
             @staticmethod
             def update(table_name: str, columns: str, condition: str) -> str:
@@ -166,11 +175,11 @@ class Driver_SQLite(BaseDriver):
 
             """
             supported_types = {
-                str: 'TEXT',
-                int: 'INTEGER',
-                float: 'REAL',
-                bool: 'BOOLEAN',
-                bytes: 'BLOB'
+                str: "TEXT",
+                int: "INTEGER",
+                float: "REAL",
+                bool: "BOOLEAN",
+                bytes: "BLOB",
             }
 
             # round 1: Built-in Types
@@ -188,7 +197,7 @@ class Driver_SQLite(BaseDriver):
             """
 
             # round 3: Custom Types
-            if isinstance(type_, str):    # custom type
+            if isinstance(type_, str):  # custom type
                 return type_
 
             # Not Supported

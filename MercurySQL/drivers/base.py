@@ -16,9 +16,10 @@ class BaseDriver:
     """
     The base class of all drivers.
     """
-    dependencies = []   # just for hints about what dependencies are needed
-    version = '0.0.0'
-    payload = '?'
+
+    dependencies = []  # just for hints about what dependencies are needed
+    version = "0.0.0"
+    payload = "?"
 
     class Cursor:
         """
@@ -96,11 +97,13 @@ class BaseDriver:
 
         Every definition will be followed by an example of it's return value (in SQLite).
         """
+
         class gensql:
             """
             APIs in this class will return a SQL code for database operations.
             Generally, these returned codes will be executed **DIRECTLY**.
             """
+
             @staticmethod
             def drop_table(table_name: str) -> str:
                 """
@@ -155,7 +158,13 @@ class BaseDriver:
                 # return f"PRAGMA table_info({table_name});"
 
             @staticmethod
-            def create_table_if_not_exists(table_name: str, column_name: str, column_type: str, primaryKey=False, autoIncrement=False) -> Union[str, List[str]]:
+            def create_table_if_not_exists(
+                table_name: str,
+                column_name: str,
+                column_type: str,
+                primaryKey=False,
+                autoIncrement=False,
+            ) -> Union[str, List[str]]:
                 """
                 Create a table if it does not exist.
 
@@ -182,7 +191,9 @@ class BaseDriver:
                 # """
 
             @staticmethod
-            def add_column(table_name: str, column_name: str, column_type: str) -> Union[str, List[str]]:
+            def add_column(
+                table_name: str, column_name: str, column_type: str
+            ) -> Union[str, List[str]]:
                 """
                 Add a column to a table.
 
@@ -232,7 +243,9 @@ class BaseDriver:
                 # """
 
             @staticmethod
-            def set_primary_key(table, keyname: str, keytype: str) -> Union[str, List[str]]:
+            def set_primary_key(
+                table, keyname: str, keytype: str
+            ) -> Union[str, List[str]]:
                 """
                 Set a primary key for the specified table.
 
@@ -400,7 +413,7 @@ class BaseDriver:
                 # return f"DELETE FROM {table_name} WHERE {condition}"
 
         @classmethod
-        def get_all_tables(cls, conn: BaseDriver.Conn) -> List[str]:
+        def get_all_tables(cls, db) -> List[str]:
             """
             Get all table's informations in the database.
 
@@ -409,17 +422,16 @@ class BaseDriver:
 
             The default implementation is based on the `cls.gensql.get_all_tables()` method.
 
-            :param conn: The connection object of the database.
-            :type conn: BaseDriver.Conn
+            :param db: The DataBase object.
+            :type db: MercurySL.gensql.DataBase
 
             :return: All table's informations in the database
             """
-            cursor = conn.cursor()
-            cursor.execute(cls.gensql.get_all_tables())
+            cursor = db.do(cls.gensql.get_all_tables())
             return list(map(lambda x: x[0], cursor.fetchall()))
 
         @classmethod
-        def get_all_columns(cls, conn: BaseDriver.Conn, table_name: str) -> List[str]:
+        def get_all_columns(cls, db, table_name: str) -> List[str]:
             """
             Get all column's informations in the table.
 
@@ -428,8 +440,8 @@ class BaseDriver:
 
             The default implementation is based on the `cls.gensql.get_all_columns(table_name)` method.
 
-            :param conn: The connection object of the database.
-            :type conn: BaseDriver.Conn
+            :param db: The DataBase object.
+            :type db: MercurySL.gensql.DataBase
             :param table_name: The name of the table.
             :type table_name: str
 
@@ -493,11 +505,11 @@ class BaseDriver:
 
             """
             supported_types = {
-                str: 'TEXT',
-                int: 'INTEGER',
-                float: 'REAL',
-                bool: 'BOOLEAN',
-                bytes: 'BLOB'
+                str: "TEXT",
+                int: "INTEGER",
+                float: "REAL",
+                bool: "BOOLEAN",
+                bytes: "BLOB",
             }
 
             # round 1: Built-in Types
@@ -515,7 +527,7 @@ class BaseDriver:
             """
 
             # round 3: Custom Types
-            if isinstance(type_, str):    # custom type
+            if isinstance(type_, str):  # custom type
                 return type_
 
             # Not Supported
@@ -529,7 +541,7 @@ class BaseDriver:
         :param db_name: The name of the database to connect.
         :type db_name: str
         :param kwargs: The parameters of the connection. E.g., `host`, `port`, `user`, `password`, ...
-        
+
         :return: The connection object of the database.
         :rtype: BaseDriver.Conn
         """
