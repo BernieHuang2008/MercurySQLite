@@ -72,10 +72,39 @@ class Driver_SQLite(BaseDriver):
             @staticmethod
             def update(table_name: str, columns: str, condition: str) -> str:
                 return f"UPDATE {table_name} SET {columns} WHERE {condition}"
+            
+            @staticmethod
+            def count(table_name: str, condition: str) -> str:
+                return f"SELECT COUNT(*) FROM {table_name} WHERE {condition}"
 
             @staticmethod
-            def query(table_name: str, selection: str, condition: str) -> str:
-                return f"SELECT {selection} FROM {table_name} WHERE {condition}"
+            def query(
+                table_name: str,
+                selection: str,
+                condition: str,
+                db,
+                limit: tuple[int] | None = None,
+            ) -> str:
+                # No limit, return all
+                if limit is None:
+                    return f"SELECT {selection} FROM {table_name} WHERE {condition}"
+
+                # Limit result
+                # parse negative index.
+                limit = list(limit)
+                res_count = -1
+                for i in range(len(limit)):
+                    if limit[i] < 0:
+                        if res_count == -1:
+                            res_count = Driver_SQLite.APIs.count_res(
+                                db, table_name, condition
+                            )
+                        limit[i] = res_count + limit[i] + 1
+
+                # turn into SQL-LIMIT format
+                offset, n = limit[0], limit[1] - limit[0]
+
+                return f"SELECT {selection} FROM {table_name} WHERE {condition} LIMIT {offset}, {n}"
 
             @staticmethod
             def delete(table_name: str, condition: str) -> str:
@@ -90,6 +119,11 @@ class Driver_SQLite(BaseDriver):
         def get_all_columns(cls, db, table_name: str) -> List[str]:
             cursor = db.do(cls.gensql.get_all_columns(table_name))
             return list(map(lambda x: [x[1], x[2]], cursor.fetchall()))
+        
+        @classmethod
+        def count_res(cls, db, table_name: str, condition: str) -> int:
+            cursor = db.do(cls.gensql.count(table_name, condition))
+            return cursor.fetchall()[0][0]  # use 'fetchall' to avoid circular call.
 
     class TypeParser:
         """
