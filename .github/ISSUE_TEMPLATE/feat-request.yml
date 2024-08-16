@@ -23,6 +23,7 @@ body:
     id: feat_cate
     attributes:
       description: What will be new if the feature is implemented?
+      label: WTF
       options:
         - label: New API
   - type: markdown
