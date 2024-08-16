@@ -19,7 +19,7 @@ body:
     id: bug_errmsg
     attributes:
       label: Error message / Wrong behavior
-      descriptoin: The error message you got / describe the wrong behavior
+      description: The error message you got / describe the wrong behavior
   - type: textarea
     id: bug_expected
     attributes:
@@ -28,7 +28,7 @@ body:
     id: bug_reproduce
     attributes:
       label: How to reproduce?
-      value: |
+      placeholder: |
         1. Go to '...'
         2. Click on '....'
         3. Scroll down to '....'
@@ -42,7 +42,7 @@ body:
     id: bug_code
     attributes:
       label: Code that cause the bug
-      descriptoin: Only the key part of your code
+      description: Only the key part of your code
       render: python
   - type: textarea
     id: bug_extra
