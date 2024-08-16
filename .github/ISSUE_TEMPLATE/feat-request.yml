@@ -1,5 +1,5 @@
 name: ✨Feature Request
-description: File a bug report.
+description: Add an exciting feature!
 title: "✨[feat] "
 labels: ["feat"]
 assignees:
@@ -28,5 +28,5 @@ body:
   - type: markdown
     id: feat_extra
     attributes:
-      value: "## Extra Things\n"
+      value: "### Additional Context\n"
   
