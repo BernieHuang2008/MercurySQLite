@@ -26,7 +26,15 @@ body:
       options:
         - label: New API
   - type: markdown
+    attributes:
+      value: "---\n# Additional Content"
+  - type: textarea
+    id: feat_newapi
+    attributes:
+      label: New API
+      description: What api will the new feature provide?
+      render: python
+  - type: textarea
     id: feat_extra
     attributes:
-      value: "### Additional Context\n"
-  
+      label: Anything Else?
