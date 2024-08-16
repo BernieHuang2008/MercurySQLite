@@ -5,6 +5,9 @@ labels: ["feat"]
 assignees:
   - BernieHuang2008
 body:
+  - type: markdown
+    attributes:
+      value: "# Basic Information"
   - type: input
     id: feat_name
     attributes:
@@ -26,7 +29,15 @@ body:
       options:
         - label: New API
   - type: markdown
+    attributes:
+      value: "# Additional Content"
+  - type: textarea
+    id: feat_newapi
+    attributes:
+      label: New API
+      description: What api will the new feature provide?
+      render: python
+  - type: textarea
     id: feat_extra
     attributes:
-      value: "### Additional Context\n"
-  
+      label: Anything Else?
