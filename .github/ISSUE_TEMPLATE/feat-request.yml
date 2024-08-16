@@ -5,6 +5,9 @@ labels: ["feat"]
 assignees:
   - BernieHuang2008
 body:
+  - type: markdown
+    attributes:
+      value: "# Basic Information"
   - type: input
     id: feat_name
     attributes:
@@ -27,7 +30,7 @@ body:
         - label: New API
   - type: markdown
     attributes:
-      value: "---\n# Additional Content"
+      value: "# Additional Content"
   - type: textarea
     id: feat_newapi
     attributes:
