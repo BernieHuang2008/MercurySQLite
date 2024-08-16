@@ -22,8 +22,7 @@ body:
   - type: checkboxes
     id: feat_cate
     attributes:
-      description: What will be new if the feature is implemented?
-      label: WTF
+      label: What will the feature introduce?
       options:
         - label: New API
   - type: markdown
