@@ -1,0 +1,32 @@
+name: ✨Feature Request
+description: Add an exciting feature!
+title: "✨[feat] "
+labels: ["feat"]
+assignees:
+  - BernieHuang2008
+body:
+  - type: input
+    id: feat_name
+    attributes:
+      label: Feature Name
+      description: Does the feature have a name?
+      placeholder: e.g. Unified Error
+    validations:
+      required: true
+  - type: textarea
+    id: feat_desc
+    attributes:
+      label: A brief introduction of the feature.
+    validations:
+      required: true
+  - type: checkboxes
+    id: feat_cate
+    attributes:
+      label: What will the feature introduce?
+      options:
+        - label: New API
+  - type: markdown
+    id: feat_extra
+    attributes:
+      value: "### Additional Context\n"
+  

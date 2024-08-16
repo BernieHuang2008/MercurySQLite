@@ -1,0 +1,45 @@
+name: 🐞Bug Report
+description: Report an annoying bug!
+title: "🐞[bug] "
+labels: ["bug"]
+assignees:
+  - BernieHuang2008
+body:
+  - type: markdown
+    id: bug_desc
+    attributes:
+      label: Describe the bug
+      value: A clear and concise description of what the bug is.
+    validations:
+      required: true
+  - type: textarea
+    id: bug_errmsg
+    attributes:
+      label: Error message / Wrong behavior
+      descriptoin: The error message you got / describe the wrong behavior
+  - type: textarea
+    id: bug_expected
+    attributes:
+      label: Expected Behavior
+  - type: markdown
+    id: bug_reproduce
+    attributes:
+      label: How to reproduce?
+      value: |
+        1. Go to '...'
+        2. Click on '....'
+        3. Scroll down to '....'
+        4. Got error.
+    validations:
+      required: true
+  - type: textarea
+    id: bug_code
+    attributes:
+      label: Code that cause the bug
+      descriptoin: Only the key part of your code
+      render: python
+  - type: markdown
+    id: bug_extra
+    attributes:
+      value: "### Additional Context\n"
+  
