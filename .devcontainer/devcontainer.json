@@ -1,0 +1,24 @@
+{
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "features": {
+    "ghcr.io/devcontainers/features/github-cli": {}
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-azuretools.vscode-docker"
+      ],
+      "remote.otherPortsAttributes": {          
+        "protocol": "https"
+      },
+      "settings": {
+        "files.autoSave": "off"
+      }
+    }
+  },
+  "forwardPorts": [3306],
+  "postCreateCommand": "git pull & service mysql start",
+}
