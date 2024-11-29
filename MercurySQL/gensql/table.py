@@ -368,8 +368,15 @@ class Table:
             table.insert(id=1, name='Bernie', age=15, __auto=True)
 
         """
-        # get keys and clean them
-        keys = list(kwargs.keys())
+
+        # if __auto is a dict 
+        if isinstance(__auto, dict):
+            keys = list(__auto.keys())
+            kwargs = __auto
+        else:
+            # get keys and clean them
+            keys = list(kwargs.keys())
+
         if "__auto" in keys:
             __auto = kwargs["__auto"]
             keys.remove("__auto")

@@ -190,7 +190,7 @@ class Driver_MySQL(BaseDriver):
             return res
 
     @staticmethod
-    def connect(db_name: str, host: str, user: str, passwd: str = '', force=False) -> Conn:
+    def connect(db_name: str, host: str, user: str, password: str = '', force=False) -> Conn:
         """
         Connect to a MySQL database.
         """
@@ -198,14 +198,14 @@ class Driver_MySQL(BaseDriver):
             return mysql.connector.connect(
                 host=host,
                 user=user,
-                passwd=passwd,
+                passwd=password,
                 database=db_name
             )
         else:
             conn = mysql.connector.connect(
                 host=host,
                 user=user,
-                passwd=passwd
+                passwd=password
             )
             conn.backup_cursor = conn.cursor
 

@@ -4,3 +4,6 @@ sphinx_rtd_theme
 
 # for release
 wheel
+
+# MySQL
+mysql.connector

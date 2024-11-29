@@ -22,6 +22,9 @@ from ..errors import *
 from .table import Table
 
 
+from ..drivers import sqlite
+
+
 # ========== Class Decorations ==========
 class DataBase:
     pass
