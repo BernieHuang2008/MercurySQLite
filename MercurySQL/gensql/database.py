@@ -129,8 +129,8 @@ class DataBase:
         Gather all infomations of the database, including:
           - all tables
         """
-        self.tables = self.driver.APIs.get_all_tables(self)
-        self.tables = {tname: Table(self, tname) for tname in self.tables}
+        tables = self.driver.APIs.get_all_tables(self)
+        self.tables = {tname: Table(self, tname) for tname in tables}
 
     def do(self, *sql: str, paras: List[tuple] = []):
         """
@@ -251,6 +251,8 @@ class DataBase:
         already_exists = False
 
         for table_name in table_names:
+            table_name = self.driver.APIs.reformat_table_name(table_name)
+
             if table_name in self.tables:
                 already_exists = True
                 if not force:
@@ -295,6 +297,8 @@ class DataBase:
 
            **See the "How It Works" section in `createTable()` for more details.**
         """
+        key = self.driver.APIs.reformat_table_name(key)
+        
         if key in self.tables:
             return self.tables[key]
         else:
@@ -319,6 +323,8 @@ class DataBase:
             - raise an Exception if not exists.
         """
         for table_name in table_names:
+            table_name = self.driver.APIs.reformat_table_name(table_name)
+
             if table_name not in self.tables:
                 raise NotExistsError(f"Table `{table_name}` not exists.")
 

@@ -2,6 +2,7 @@
 Requirements: 
   - sqlite3
 """
+
 from .base import BaseDriver
 
 import sqlite3
@@ -13,9 +14,9 @@ class Driver_SQLite(BaseDriver):
 
 
 class Driver_SQLite(BaseDriver):
-    dependencies = ['sqlite3']
-    version = '0.1.0'
-    payload = '?'
+    dependencies = ["sqlite3"]
+    version = "0.1.1"
+    payload = "?"
 
     Conn = sqlite3.Connection
     Cursor = sqlite3.Cursor
@@ -35,7 +36,13 @@ class Driver_SQLite(BaseDriver):
                 return f"PRAGMA table_info({table_name});"
 
             @staticmethod
-            def create_table_if_not_exists(table_name: str, column_name: str, column_type: str, primaryKey=False, autoIncrement=False) -> str:
+            def create_table_if_not_exists(
+                table_name: str,
+                column_name: str,
+                column_type: str,
+                primaryKey=False,
+                autoIncrement=False,
+            ) -> str:
                 return f"""
                     CREATE TABLE IF NOT EXISTS {table_name} ({column_name} {column_type} {'PRIMARY KEY' if primaryKey else ''} {'AUTOINCREMENT' if autoIncrement else ''})
                 """
@@ -58,7 +65,7 @@ class Driver_SQLite(BaseDriver):
                     f"CREATE TABLE ___temp_table ({keyname} {keytype} PRIMARY KEY, {', '.join([f'{name} {type_}' for name, type_ in table.columnsType.items() if name != keyname])})",
                     f"INSERT INTO ___temp_table SELECT * FROM {table.table_name}",
                     f"DROP TABLE {table.table_name}",
-                    f"ALTER TABLE ___temp_table RENAME TO {table.table_name}"
+                    f"ALTER TABLE ___temp_table RENAME TO {table.table_name}",
                 ]
 
             @staticmethod
@@ -67,7 +74,9 @@ class Driver_SQLite(BaseDriver):
 
             @staticmethod
             def insert_or_update(table_name: str, columns: str, values: str) -> str:
-                return f"INSERT OR REPLACE INTO {table_name} ({columns}) VALUES ({values})"
+                return (
+                    f"INSERT OR REPLACE INTO {table_name} ({columns}) VALUES ({values})"
+                )
 
             @staticmethod
             def update(table_name: str, columns: str, condition: str) -> str:
@@ -84,12 +93,58 @@ class Driver_SQLite(BaseDriver):
         @classmethod
         def get_all_tables(cls, db) -> List[str]:
             cursor = db.do(cls.gensql.get_all_tables())
-            return list(map(lambda x: x[0], cursor.fetchall()))
+            res = list(map(lambda x: x[0], cursor.fetchall()))
+            res = list(map(cls.reformat_table_name, res))
+            return res
 
         @classmethod
         def get_all_columns(cls, db, table_name: str) -> List[str]:
             cursor = db.do(cls.gensql.get_all_columns(table_name))
-            return list(map(lambda x: [x[1], x[2]], cursor.fetchall()))
+            res = list(map(lambda x: [x[1], x[2]], cursor.fetchall()))
+            res = list(map(lambda x: (cls.reformat_column_name(x[0]), x[1]), res))
+            return res
+
+        @staticmethod
+        def reformat_table_name(table_name: str) -> str:
+            """
+            Rules:
+            - Lowercase
+            - Replace all non-alphanumeric characters with '_'
+            - Not starts with digits
+            """
+            # Rule 1: Lowercase
+            res = table_name.lower()
+
+            # Rule 2: Replace all non-alphanumeric characters with '_'
+            for c in table_name:
+                if c not in "abcdefghijklmnopqrstuvwxyz0123456789_":
+                    res = res.replace(c, '_')
+
+            # Rule 3: Not starts with digits
+            if c[0] in "0123456789":
+                res = "_" + res
+        
+            return res
+        
+        @staticmethod
+        def reformat_column_name(column_name: str) -> str:
+            """
+            Rules:
+            - Lowercase
+            - Replace all non-alphanumeric characters with '_'
+            - Not starts with digits
+            """
+            res = column_name.lower()
+
+            for c in column_name:
+                if c not in "abcdefghijklmnopqrstuvwxyz0123456789_":
+                    res = res.replace(c, '_')
+
+            if res[0] in "0123456789":
+                res = "_" + res
+        
+            return res
+
 
     class TypeParser:
         """
@@ -132,11 +187,11 @@ class Driver_SQLite(BaseDriver):
 
             """
             supported_types = {
-                str: 'TEXT',
-                int: 'INTEGER',
-                float: 'REAL',
-                bool: 'BOOLEAN',
-                bytes: 'BLOB'
+                str: "TEXT",
+                int: "INTEGER",
+                float: "REAL",
+                bool: "BOOLEAN",
+                bytes: "BLOB",
             }
 
             # round 1: Built-in Types
@@ -154,7 +209,7 @@ class Driver_SQLite(BaseDriver):
             """
 
             # round 3: Custom Types
-            if isinstance(type_, str):    # custom type
+            if isinstance(type_, str):  # custom type
                 return type_
 
             # Not Supported

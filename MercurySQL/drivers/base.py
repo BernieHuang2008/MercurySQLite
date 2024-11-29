@@ -16,9 +16,10 @@ class BaseDriver:
     """
     The base class of all drivers.
     """
-    dependencies = []   # just for hints about what dependencies are needed
-    version = '0.0.0'
-    payload = '?'
+
+    dependencies = []  # just for hints about what dependencies are needed
+    version = "0.0.0"
+    payload = "?"
 
     class Cursor:
         """
@@ -96,11 +97,13 @@ class BaseDriver:
 
         Every definition will be followed by an example of it's return value (in SQLite).
         """
+
         class gensql:
             """
             APIs in this class will return a SQL code for database operations.
             Generally, these returned codes will be executed **DIRECTLY**.
             """
+
             @staticmethod
             def drop_table(table_name: str) -> str:
                 """
@@ -155,7 +158,13 @@ class BaseDriver:
                 # return f"PRAGMA table_info({table_name});"
 
             @staticmethod
-            def create_table_if_not_exists(table_name: str, column_name: str, column_type: str, primaryKey=False, autoIncrement=False) -> Union[str, List[str]]:
+            def create_table_if_not_exists(
+                table_name: str,
+                column_name: str,
+                column_type: str,
+                primaryKey=False,
+                autoIncrement=False,
+            ) -> Union[str, List[str]]:
                 """
                 Create a table if it does not exist.
 
@@ -182,7 +191,9 @@ class BaseDriver:
                 # """
 
             @staticmethod
-            def add_column(table_name: str, column_name: str, column_type: str) -> Union[str, List[str]]:
+            def add_column(
+                table_name: str, column_name: str, column_type: str
+            ) -> Union[str, List[str]]:
                 """
                 Add a column to a table.
 
@@ -232,7 +243,9 @@ class BaseDriver:
                 # """
 
             @staticmethod
-            def set_primary_key(table, keyname: str, keytype: str) -> Union[str, List[str]]:
+            def set_primary_key(
+                table, keyname: str, keytype: str
+            ) -> Union[str, List[str]]:
                 """
                 Set a primary key for the specified table.
 
@@ -371,7 +384,7 @@ class BaseDriver:
                 # return f"DELETE FROM {table_name} WHERE {condition}"
 
         @classmethod
-        def get_all_tables(cls, conn: BaseDriver.Conn) -> List[str]:
+        def get_all_tables(cls, db) -> List[str]:
             """
             Get all table's informations in the database.
 
@@ -380,17 +393,18 @@ class BaseDriver:
 
             The default implementation is based on the `cls.gensql.get_all_tables()` method.
 
-            :param conn: The connection object of the database.
-            :type conn: BaseDriver.Conn
+            :param db: The DataBase object
+            :type db: MercurySQL.DataBase
 
             :return: All table's informations in the database
             """
-            cursor = conn.cursor()
-            cursor.execute(cls.gensql.get_all_tables())
-            return list(map(lambda x: x[0], cursor.fetchall()))
+            cursor = db.do(cls.gensql.get_all_tables())
+            res = list(map(lambda x: x[0], cursor.fetchall()))
+            res = list(map(cls.reformat_table_name, res))
+            return res
 
         @classmethod
-        def get_all_columns(cls, conn: BaseDriver.Conn, table_name: str) -> List[str]:
+        def get_all_columns(cls, db, table_name: str) -> List[str]:
             """
             Get all column's informations in the table.
 
@@ -399,17 +413,40 @@ class BaseDriver:
 
             The default implementation is based on the `cls.gensql.get_all_columns(table_name)` method.
 
-            :param conn: The connection object of the database.
-            :type conn: BaseDriver.Conn
+            :param db: The DataBase object
+            :type db: MercurySQL.DataBase
+
             :param table_name: The name of the table.
             :type table_name: str
 
             :return: All column's informations in the table.
             :rtype: List[str]. Each element is a list of `[column_name, column_type]`.
             """
-            cursor = conn.cursor()
-            cursor.execute(cls.gensql.get_all_columns(table_name))
-            return cursor.fetchall()
+            cursor = db.do(cls.gensql.get_all_columns(table_name))
+            res = list(map(lambda x: [x[1], x[2]], cursor.fetchall()))
+            res = list(map(lambda x: (cls.reformat_column_name(x[0]), x[1]), res))
+            return res
+
+        @staticmethod
+        def reformat_table_name(table_name: str) -> str:
+            """
+            Reformat the table name to a valid format.
+
+            Default implementation is based on SQLite:
+            - No uppercase letters.
+            - Only lowercase letters, numbers, and underscores are allowed.
+
+            :param table_name: The table name to be reformatted.
+            :type table_name: str
+
+            :return: The reformatted table name.
+            :rtype: str
+            """
+            res = table_name.lower()
+
+            for c in table_name:
+                if c not in "abcdefghijklmnopqrstuvwxyz0123456789_":
+                    res = res.replace(c, "_")
 
     class TypeParser:
         """
@@ -442,11 +479,11 @@ class BaseDriver:
 
             """
             supported_types = {
-                str: 'TEXT',
-                int: 'INTEGER',
-                float: 'REAL',
-                bool: 'BOOLEAN',
-                bytes: 'BLOB'
+                str: "TEXT",
+                int: "INTEGER",
+                float: "REAL",
+                bool: "BOOLEAN",
+                bytes: "BLOB",
             }
 
             # round 1: Built-in Types
@@ -464,7 +501,7 @@ class BaseDriver:
             """
 
             # round 3: Custom Types
-            if isinstance(type_, str):    # custom type
+            if isinstance(type_, str):  # custom type
                 return type_
 
             # Not Supported
@@ -478,7 +515,7 @@ class BaseDriver:
         :param db_name: The name of the database to connect.
         :type db_name: str
         :param kwargs: The parameters of the connection. E.g., `host`, `port`, `user`, `password`, ...
-        
+
         :return: The connection object of the database.
         :rtype: BaseDriver.Conn
         """
