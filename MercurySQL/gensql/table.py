@@ -210,7 +210,7 @@ class Table:
         return QueryResult(self, exp, selection)
 
     def newColumn(
-        self, name: str, type_: Any, force=False, primaryKey=False, autoIncrement=False
+        self, name: str, type_: Any, default = None, force=False, primaryKey=False, autoIncrement=False
     ) -> None:
         """
         Add a new column to the table.
@@ -245,8 +245,12 @@ class Table:
                 raise DuplicateError(f"Column `{name}` already exists.")
             else:
                 return
+        
+        if default and type(default) != type_:
+            raise TypeNotMatchError(default, type(default), name, type_)
 
         type_ = self.driver.TypeParser.parse(type_)
+        default = self.driver.TypeParser.add_punctuation(default)
 
         if self.isEmpty:
             # create it first
@@ -254,13 +258,14 @@ class Table:
                 self.table_name,
                 name,
                 type_,
+                default,
                 primaryKey=primaryKey,
                 autoIncrement=autoIncrement,
             )
             self.db.do(cmd)
             self.isEmpty = False
         else:
-            cmd = self.driver.APIs.gensql.add_column(self.table_name, name, type_)
+            cmd = self.driver.APIs.gensql.add_column(self.table_name, name, type_, default)
             self.db.do(cmd)
 
             if primaryKey:
@@ -270,7 +275,7 @@ class Table:
         self.columnsType[name] = type_
 
     def struct(
-        self, columns: dict, skipError=True, primaryKey: str = None, autoIncrement=False, force=True
+        self, columns: dict, skipError=True, primaryKey: str = None, autoIncrement=False, force=True, rebuild=False
     ) -> None:
         """
         Set the structure of the table.
@@ -281,6 +286,8 @@ class Table:
         :type skipError: bool
         :param primaryKey: The primary key of the table.
         :type primaryKey: str
+        :param rebuild: Whether to rebuild the table.
+        :type rebuild: bool
 
         Example Usage:
 
@@ -298,26 +305,40 @@ class Table:
         skipError = skipError and force
 
         for name, type_ in columns.items():
+            default_value = None
+            
+
+            # 支持 type_ 为 [str, "默认值"] 的写法
+            if isinstance(type_, list):
+                default_value = type_[1]
+                type_ = type_[0]
+
             type_origin = type_
             type_ = self.driver.TypeParser.parse(type_)
             isPrimaryKey = name == primaryKey
 
             if name in self.columns:
-                if type_.lower() != self.columnsType[name].lower():
+                if rebuild:
+                    print(f"Testing function, still constructing...")
+                    # TODO: 这个Rebuild理论上会重新创建一个表，但是对应的底层代码还没写完
+                    # self.delColumn(name)
+                elif type_.lower() != self.columnsType[name].lower():
                     raise ConfilictError(
                         f"Column `{name}` with different types (`{self.columnsType[name]}`) already exists. While trying to add column `{name}` with type `{type_}`."
                     )
                 elif not skipError:
                     raise DuplicateError(
-                        f"Column `{name}` already exists. You can use `force=True` to avoid this error."
+                        f"Column `{name}` already exists. You can use `skipError=True` to avoid this error."
                     )
-            else:
-                self.newColumn(
-                    name,
-                    type_origin,
-                    primaryKey=isPrimaryKey,
-                    autoIncrement=autoIncrement,
-                )
+                
+            # Raise 错误后不会执行后续代码，所以这里可以不用 Else
+            self.newColumn(
+                name,
+                type_origin,
+                default=default_value,
+                primaryKey=isPrimaryKey,
+                autoIncrement=autoIncrement,
+            )
 
     def delColumn(self, name: str) -> None:
         if name not in self.columns:
@@ -329,7 +350,8 @@ class Table:
         else:
             # delete the column
             self.columns.remove(name)
-            cmd = self.driver.APIs.gensql.drop_column(name)
+            # 这一行有Bug，修复了
+            cmd = self.driver.APIs.gensql.drop_column(table_name=self.table_name,column_name=name)
             self.db.do(cmd)
 
     def setPrimaryKey(self, keyname: str, keytype: str) -> None:
@@ -368,8 +390,16 @@ class Table:
             table.insert(id=1, name='Bernie', age=15, __auto=True)
 
         """
-        # get keys and clean them
-        keys = list(kwargs.keys())
+
+        # TODO: 为了兼容v1.0中的json格式传参的问题，v1.0需要修复
+        # if __auto is a dict 
+        if isinstance(__auto, dict):
+            keys = list(__auto.keys())
+            kwargs = __auto
+        else:
+            # get keys and clean them
+            keys = list(kwargs.keys())
+
         if "__auto" in keys:
             __auto = kwargs["__auto"]
             keys.remove("__auto")

@@ -17,3 +17,10 @@ Please refer to the individual class documentation for more details.
 
 from .gensql import DataBase, Table, set_driver
 from . import drivers
+
+class SQL:
+    """Wrap everything together"""
+    DataBase = DataBase
+    Table = Table
+    set_driver = set_driver
+    drivers = drivers

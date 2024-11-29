@@ -1,5 +1,6 @@
 .vscode/*
 */__pycache__/*
+__pycache__
 *.pyc
 __local/*
 *.db
@@ -11,3 +12,4 @@ MercurySQL.egg-info/*
 runtime
 runtime/*
 *.test.py
+

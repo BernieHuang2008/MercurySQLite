@@ -35,15 +35,15 @@ class Driver_SQLite(BaseDriver):
                 return f"PRAGMA table_info({table_name});"
 
             @staticmethod
-            def create_table_if_not_exists(table_name: str, column_name: str, column_type: str, primaryKey=False, autoIncrement=False) -> str:
+            def create_table_if_not_exists(table_name: str, column_name: str, column_type: str, column_default: str | None = None, primaryKey=False, autoIncrement=False) -> str:
                 return f"""
-                    CREATE TABLE IF NOT EXISTS {table_name} ({column_name} {column_type} {'PRIMARY KEY' if primaryKey else ''} {'AUTOINCREMENT' if autoIncrement else ''})
+                    CREATE TABLE IF NOT EXISTS {table_name} ({column_name} {column_type} {'PRIMARY KEY' if primaryKey else ''} {'AUTOINCREMENT' if autoIncrement else ''} {'DEFAULT ' + column_default if column_default else ''})
                 """
 
             @staticmethod
-            def add_column(table_name: str, column_name: str, column_type: str) -> str:
+            def add_column(table_name: str, column_name: str, column_type: str, column_default: str) -> str:
                 return f"""
-                    ALTER TABLE {table_name} ADD COLUMN {column_name} {column_type}
+                    ALTER TABLE {table_name} ADD COLUMN {column_name} {column_type} {'DEFAULT ' + column_default if column_default else ''}
                 """
 
             @staticmethod
@@ -159,6 +159,28 @@ class Driver_SQLite(BaseDriver):
 
             # Not Supported
             raise TypeError(f"Type `{str(type_)}` not supported.")
+
+        @staticmethod
+        def add_punctuation(data: any) -> str:
+            """
+            Convert data to data that can be insert into a sql, 
+            for example if data is str, return 'data' as a string,
+            if data is a number, return this number
+            """
+            if data is None:
+                return None
+
+            if isinstance(data, str):
+                return f"'{data}'"
+            elif isinstance(data, bool):
+                return str(data).lower()
+            elif isinstance(data, (int, float)):
+                return str(data)
+            elif isinstance(data, bytes):
+                return f"x'{data.hex()}'" # Dont know if this is correct
+            else:
+                raise TypeError(f"Type `{str(type(data))}` not supported.")
+
 
     @staticmethod
     def connect(db_name: str, **kwargs) -> Driver_SQLite.Conn:
